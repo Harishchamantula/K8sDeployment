@@ -1,0 +1,170 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-iviva-hermes
+spec:
+  replicas: {{ .Values.iviva.hermespodscount}}
+  strategy:
+        type: {{ .Values.deployment.type }}
+        rollingUpdate:
+           maxSurge: {{ .Values.deployment.maxSurge}}
+           maxUnavailable: {{ .Values.deployment.maxUnavailable}}  
+  selector:
+    matchLabels:
+      app: {{ .Release.Name }}-iviva-hermes
+  template:
+    metadata:
+      labels:
+        app: {{ .Release.Name }}-iviva-hermes
+    
+    spec:
+      containers:      
+      - name: {{ .Release.Name }}-iviva-hermes
+        image: iviva.azurecr.io/v4/cp-1/hermes-dotnet:latest
+        resources:
+          requests:
+            memory: {{ .Values.memrequests.hermes}}
+            cpu: {{ .Values.cpurequests.hermes}}
+          limits:
+            memory: {{ .Values.memlimits.hermes}}
+            cpu: {{ .Values.cpulimits.hermes}}
+        env:
+        - name: HERMES_CONFIG_PATH
+          value: /iviva/config/hermesconfig.yaml
+        ports:
+        - containerPort: 20000 
+        # command: ["tail"]
+        # args:
+        #   - "-f"
+        #   - "/dev/null"            
+        volumeMounts:
+          - name:  {{ .Release.Name }}-ivivaweblogs
+            mountPath:  /var/log/iviva
+          - name:  {{ .Release.Name }}-ivivawebtmp
+            mountPath:  /tmp/iviva
+          - name:  {{ .Release.Name }}-ivivahermesconfig
+            mountPath:  /iviva/config        
+      restartPolicy: Always
+
+      volumes:
+        - name: {{ .Release.Name }}-ivivahermesconfig
+          configMap: 
+            name:  {{ .Release.Name }}-ivivahermesconfig
+            defaultMode : 0777
+        - name: {{ .Release.Name }}-ivivawebtmp
+          emptyDir: {}
+        - name: {{ .Release.Name }}-ivivaweblogs
+          emptyDir: {}        
+      imagePullSecrets:
+      - name: azure-reg-pull   
+
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}-ivivahermesconfig
+  labels:
+    app: {{ .Release.Name }}-ivivahermesconfig
+data:
+  hermesconfig.yaml: |
+    # Host to run Hermes in
+      # default: http://localhost:20000
+      Hermes.Server.Host: http://+:20000
+      
+      # Path to store logs. If ignored or value is empty, logging is disabled
+      Hermes.Log.Path: /iviva/logs
+      
+      # Path to lucy http server token endpoint
+      # Refer to Lucy's LucyEngine.HttpServer.Host & LucyEngine.HttpServer.Port configuration
+      # Note: /filemanager/auth is the actual path, only the host & port might change based on above configuration
+      Hermes.Lucy.Token.Url: {{ .Release.Name }}-ivivanginx-cluster-ip/filemanager/auth
+      
+      # MongoDB connection string
+      # Example: mongodb://localhost:27107
+      Hermes.ProgressTracking.DB: mongodb://mongo:27017
+      
+      # interval to flush db changes in *milliseconds*
+      # default: 5000
+      Hermes.ProgressTracking.FlushInterval: "5000"
+      
+      # max of number of db scripts that can buffered, after which scripts are flushed
+      # default: 255
+      Hermes.ProgressTracking.MaxFlushThreshold: "255"
+      
+      # iviva endpoint for file manager downloads
+      # `{account}` will be automatically replaced by Hermes
+      Hermes.File.Downloads.Url: http://{account}.iviva.local/filemanager/download
+      
+      # Location where file manager temp uploads are stored
+      Hermes.File.TempUploads.Path: /tmp/iviva/uploads/filemanager
+      
+      # Location where file manager uploads are stored
+      Hermes.File.Uploads.Path: /iviva/uploads/filemanager
+      
+      # Chunk size to use while doing read & write in *bytes*
+      # Don't choose too high - network or bandwidth issues
+      # Don't choose too low - increased api calls to external system
+      # default: 52424880 (5 MB)
+      Hermes.File.ChunkSize: "52424880"
+      
+      # Maximum number of times to retry the operation before returning with error
+      # default: 3
+      Hermes.CopyFile.MaxRetries: "3"
+      
+      # Interval between retry in *milliseconds*
+      # default: 1000
+      Hermes.CopyFile.RetryInterval: "1000"
+      
+      # Time to wait for a token response from Lucy in *milliseconds*
+      # default: 10000
+      Hermes.CopyFile.TokenReceiveTimeout: "10000"
+      
+      # Interval between job status check in *milliseconds*
+      # If a job is "Paused", we use this interval to re-check job status, in hopes of resuming
+      # default: 5000
+      Hermes.CopyFile.StatusCheckInterval: "5000"
+      
+      # Maximum number of times to retry the operation before returning with error
+      # default: 3
+      Hermes.ReadFile.MaxRetries: "3"
+      
+      # Interval between retry in *milliseconds*
+      # default: 1000
+      Hermes.ReadFile.RetryInterval: "1000"
+      
+      # Time to wait for a token response from Lucy in *milliseconds*
+      # default: 10000
+      Hermes.ReadFile.TokenReceiveTimeout: "10000"
+      
+      # Maximum number of times to retry the operation before returning with error
+      # default: 3
+      Hermes.GenerateLink.MaxRetries: "3"
+      
+      # Interval between retry in *milliseconds*
+      # default: 1000
+      Hermes.GenerateLink.RetryInterval: "1000"
+      
+      # Time to wait for a token response from Lucy in *milliseconds*
+      # default: 10000
+      Hermes.GenerateLink.TokenReceiveTimeout: "10000"
+      
+      # Link expiry in *seconds*
+      # default: 21600 (6 hours)
+      Hermes.GenerateLink.Expiry: "21600"
+
+
+
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name:  {{ .Release.Name }}-iviva-hermes
+spec:
+  selector:
+    app:  {{ .Release.Name }}-iviva-hermes
+  type:  ClusterIP
+  ports:
+  - name:  {{ .Release.Name }}-iviva-hermesport
+    port:  20000
+    targetPort:  20000

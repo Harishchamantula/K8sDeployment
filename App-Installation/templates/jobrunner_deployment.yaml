@@ -1,0 +1,57 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-ivivajobrunner
+spec:
+  replicas: {{ .Values.iviva.jobrunnerpodscount}}
+  strategy:
+        type: {{ .Values.deployment.type }}
+        rollingUpdate:
+           maxSurge: {{ .Values.deployment.maxSurge}}
+           maxUnavailable: {{ .Values.deployment.maxUnavailable}} 
+  selector:
+    matchLabels:
+      app: {{ .Release.Name }}-ivivajobrunner
+  template:
+    metadata:
+      labels:
+        app: {{ .Release.Name }}-ivivajobrunner
+    spec:
+      containers:      
+      - name: {{ .Release.Name }}-ivivajobrunner
+        image: iviva.azurecr.io/v4/cp-1/jobrunner/{{.Values.iviva.FWid}}/productapps/{{.Values.iviva.appsid}}/uxp:{{.Values.iviva.uxpid}}
+        resources:
+          requests:
+            memory: {{ .Values.memrequests.jobrunner}}
+            cpu: {{ .Values.cpurequests.jobrunner}}
+          limits:
+            memory: {{ .Values.memlimits.jobrunner}}
+            cpu: {{ .Values.cpulimits.jobrunner}}
+        env:
+          - name:  IVIVA_CONFIG_PATH
+            value: /iviva/config/ivivaconfig.yaml
+          - name: LUCYENGINE_HTTPSERVER_HOST
+            value: {{.Release.Name}}-lucyengineprimary
+          - name: LUCYENGINE_HTTPSERVER_PORT
+            value: "9111"
+        volumeMounts:
+          - name:  {{ .Release.Name }}-ivivaconfig
+            mountPath:  /iviva/config
+          - name:  {{ .Release.Name }}-ivivajobrunnerlogs
+            mountPath:  /var/log/iviva
+      restartPolicy: Always
+
+      volumes:
+        - name: {{ .Release.Name }}-ivivaconfig
+          configMap: 
+            name: {{ .Release.Name }}-ivivaconfig
+            defaultMode : 0777
+        - name: {{ .Release.Name }}-ivivajobrunnerlogs
+          emptyDir: {}
+      imagePullSecrets:
+      - name: azure-reg-pull
+      
+
+
+
+

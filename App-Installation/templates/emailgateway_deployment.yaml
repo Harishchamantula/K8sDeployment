@@ -1,0 +1,58 @@
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-ivivaemailgateway
+spec:
+  replicas: {{ .Values.iviva.emailgatewaypodscount}}
+  strategy:
+        type: {{ .Values.deployment.type }}
+        rollingUpdate:
+           maxSurge: {{ .Values.deployment.maxSurge}}
+           maxUnavailable: {{ .Values.deployment.maxUnavailable}}  
+  selector:
+    matchLabels:
+      app: {{ .Release.Name }}-ivivaemailgateway
+  template:
+    metadata:
+      labels:
+        app: {{ .Release.Name }}-ivivaemailgateway
+    spec:
+      containers:      
+      - name: {{ .Release.Name }}-ivivaemailgateway
+        image: iviva.azurecr.io/v4/cp-1/emailgateway/{{.Values.iviva.FWid}}/productapps/{{.Values.iviva.appsid}}/uxp:{{.Values.iviva.uxpid}}
+        resources:
+          requests:
+            memory: {{ .Values.memrequests.emailgateway}}
+            cpu: {{ .Values.cpurequests.emailgateway}}
+          limits:
+            memory: {{ .Values.memlimits.emailgateway}}
+            cpu: {{ .Values.cpulimits.emailgateway}}
+        env:
+          - name:  IVIVA_CONFIG_PATH
+            value: /iviva/config/ivivaconfig.yaml
+          - name: LUCYENGINE_HTTPSERVER_HOST
+            value: {{.Release.Name}}-lucyengineprimary 
+          - name: LUCYENGINE_HTTPSERVER_PORT
+            value: "9111"
+        volumeMounts:
+          - name:  {{ .Release.Name }}-ivivaconfig
+            mountPath:  /iviva/config
+          - name:  {{ .Release.Name }}-ivivaemailgatewaylogs
+            mountPath:  /var/log/iviva
+      restartPolicy: Always
+
+      volumes:
+        - name: {{ .Release.Name }}-ivivaconfig
+          configMap: 
+            name: {{ .Release.Name }}-ivivaconfig
+            defaultMode : 0777
+        - name: {{ .Release.Name }}-ivivaemailgatewaylogs
+          emptyDir: {}
+      imagePullSecrets:
+      - name: azure-reg-pull
+      
+
+
+
+

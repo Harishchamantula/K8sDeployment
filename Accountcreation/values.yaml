@@ -1,0 +1,13 @@
+iviva:
+  FWid: "b84ac81a" ###### FW id from Eutech
+  appsid: "4d54331d" ####### apps id from Eutech
+  uxpid: "latest"  ###### uxp id from Eutech
+  releasename: "iviva" ### Enter releasename of iviva
+  accountname: "devsl" ##Enter the name of the account that need to be created
+  accountfirstname: "Raseel" ### Enter the firstname of the account that is being created
+  accountlastname: "SL" ### Enter the firstname of the account that is being created
+  accountusername: "admin" ### Enter the username of the account that is being created
+  accountpassword: "123" ### Enter the password of the account that is being created
+  accountemailid: "raseel@mda.gov.sa"  ### Enter the emailid of the account that is being created
+  gitpersonalaccesstoken: "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"
+  giturl: "github.com/raseel-internal/mda-account-creation.git"

@@ -1,0 +1,176 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-ivivaweb
+spec:
+  replicas: {{ .Values.iviva.webpodscount}}
+  strategy:
+        type: {{ .Values.deployment.type }}
+        rollingUpdate:
+           maxSurge: {{ .Values.deployment.maxSurge}}
+           maxUnavailable: {{ .Values.deployment.maxUnavailable}}  
+  selector:
+    matchLabels:
+      app: {{ .Release.Name }}-ivivaweb
+  template:
+    metadata:
+      labels:
+        app: {{ .Release.Name }}-ivivaweb
+    spec:
+      hostAliases:
+      - ip: "0.0.0.0"
+        hostnames:
+        - "{{ .Release.Name }}-ivivaweb-cluster-ip"  
+      containers:      
+      - name: {{ .Release.Name }}-ivivaweb
+        image: iviva.azurecr.io/v4/cp-1/ivivaweb/{{.Values.iviva.FWid}}/productapps/{{.Values.iviva.appsid}}/uxp:{{.Values.iviva.uxpid}}
+        resources:
+          requests:
+            memory: {{ .Values.memrequests.ivivaweb}}
+            cpu: {{ .Values.cpurequests.ivivaweb}}
+          limits:
+            memory: {{ .Values.memlimits.ivivaweb}}
+            cpu: {{ .Values.cpulimits.ivivaweb}}
+        env:
+          - name:  IVIVA_CONFIG_PATH
+            value: /iviva/config/ivivaconfig.yaml
+          - name: LUCYENGINE_HTTPSERVER_HOST
+            value: {{.Release.Name}}-lucyengineprimary 
+          - name: LUCYENGINE_HTTPSERVER_PORT
+            value: "9111"
+          - name:  HERMES_CONFIG_PATH
+            value: /iviva/config/hermesconfig.yaml
+        ports:
+        - containerPort: 80             
+        volumeMounts:
+          - name:  {{ .Release.Name }}-ivivaconfig
+            mountPath:  /iviva/config
+          - name:  {{ .Release.Name }}-ivivaweblogs
+            mountPath:  /var/log/iviva
+          - name:  {{ .Release.Name }}-ivivawebtmp
+            mountPath:  /tmp/iviva
+
+      volumes:
+        - name: {{ .Release.Name }}-ivivaconfig
+          configMap: 
+            name: {{ .Release.Name }}-ivivaconfig
+            defaultMode : 0777
+        - name: {{ .Release.Name }}-hermes-config
+          configMap: 
+            name:  {{ .Release.Name }}-ivivahermesconfig
+            defaultMode : 0777
+        - name: {{ .Release.Name }}-ivivaweblogs
+          emptyDir: {}
+        - name: {{ .Release.Name }}-ivivawebtmp
+          emptyDir: {}
+      imagePullSecrets:
+      - name: azure-reg-pull
+      
+
+
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name:  {{ .Release.Name }}-ivivaweb-cluster-ip
+spec:
+  selector:
+    app:  {{ .Release.Name }}-ivivaweb
+  type:  ClusterIP
+  ports:
+  - name:  {{ .Release.Name }}-ivivawebport
+    port:  80
+    targetPort:  80
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}-ivivaconfig
+  labels:
+    app: {{ .Release.Name }}-ivivaconfig
+  annotations:
+    "helm.sh/hook": pre-install,pre-upgrade
+    "helm.sh/hook-weight": "-4"
+data:
+  ivivaconfig.yaml: |
+
+    configuration: 
+      account_domain_map: ~
+      settings: 
+        AccountUrl: "{{.Values.iviva.accounturl}}"
+        BaseDomain: "{{.Values.iviva.basedomain}}"
+        Clustered: 0
+        CustomAppRepositoryPath: /iviva/apps/lucy-connectors
+        CustomAppsPath: /iviva/apps/lucylaunch/apps,/iviva/apps/uxp,/iviva/apps/mda
+        DB: "user id={{.Values.iviva.sqluid}};pwd={{.Values.iviva.sqlpwd}};data source={{.Values.iviva.sqlserver}};initial catalog={{.Values.dbnames.aspdbname}}"
+        EmailGateway.EmailAddress: "{{.Values.emailgateway.fromemailaddress}}"
+        EmailGateway.Host: "{{.Values.emailgateway.host}}"
+        EmailGateway.Password: "{{.Values.emailgateway.password}}"
+        EmailGateway.Port: "{{.Values.emailgateway.port}}"
+        EmailGateway.User: "{{.Values.emailgateway.user}}"        
+        FileServer: s3://asiapacificsingaporeiviva
+        AWS.Key: 
+        AWS.Secret: ""
+        GroupDB: "user id={{.Values.iviva.sqluid}};pwd={{.Values.iviva.sqlpwd}};data source={{.Values.iviva.sqlserver}};initial catalog={{.Values.dbnames.groupdbname}}"
+        Iviva.FileManager.TempUploads: /tmp/iviva/uploads/filemanager
+        Iviva.FileManager.Uploads: /iviva/uploads/filemanager
+        Iviva.Server.Host: "http://0.0.0.0:80"
+        JobQueueDB: "user id={{.Values.iviva.sqluid}};pwd={{.Values.iviva.sqlpwd}};data source={{.Values.iviva.sqlserver}};initial catalog={{.Values.dbnames.jobqueuedbname}}"
+        LogPath: /var/log/iviva
+        Lucy.EnableCors: 1
+        LucyEngine.ClusterLockTime: 3
+        LucyEngine.Clustered: "{{.Values.iviva.lucyengineclustered}}"
+        LucyEngine.DebugDataStore: "mongodb://{{.Values.mongodb.username}}:{{.Values.mongodb.password}}@{{.Values.mongodb.replicaseturl}}/?replicaSet={{.Values.mongodb.replicasetname}}"
+        LucyEngine.FileManager.Url: "http://hermes:20000"
+        LucyEngine.HttpServer.Host: +
+        LucyEngine.HttpServer.Port: 9111
+        LucyEngine.HydraHost: "{{ .Release.Name }}-ivivahydra-cluster-ip"
+        LucyEngine.HydraPort: 7000
+        #LucyEngine.TimeSeries.InfluxUrl: "http://{{.Release.Name}}-iviva-influx-cluster-ip:8086"
+        LucyEngine.TimeSeries.InfluxUrl: "http://{{.Values.iviva.influxdb}}:8086"
+        LucyEngine.TimeSeries.FlushInterval: 5000
+        LucyEngine.TimeSeries.MaxFlushThreshold: 100
+        LucyEngine.TimeSeries.MinFlushThreshold: 1
+        LucyEngine.TimeSeries.DataStore: influxdb
+        LucyEngine.CanRunPreProcessService: 1
+        LucyEngine.TimeSeries.MinFlushThreshold: 1
+        LucyEventDB: "user id={{.Values.iviva.sqluid}};pwd={{.Values.iviva.sqlpwd}};data source={{.Values.iviva.sqlserver}};initial catalog={{.Values.dbnames.lucyeventdbname}}"
+        LucyServer: "{{ .Release.Name }}-lucyengineprimary:9090"
+        MessagingDB: "user id={{.Values.iviva.sqluid}};pwd={{.Values.iviva.sqlpwd}};data source={{.Values.iviva.sqlserver}};initial catalog={{.Values.dbnames.messagingdbname}}"        
+        MongoDBServer: "mongodb://{{.Values.mongodb.username}}:{{.Values.mongodb.password}}@{{.Values.mongodb.replicaseturl}}/?replicaSet={{.Values.mongodb.replicasetname}}"
+        # MongoDBServer: "mongodb://{{ .Release.Name }}-iviva-mongodb-cluster-ip:27017"       
+        OauthCallbackUri: "https://v4check.mdadev.iviva.cloud/IAM/InvokeCallBack"
+        Path: /iviva/apps/productapps
+        ProcessEngine.Clustered: "{{.Values.processengine.clustered}}"
+        ProcessEngine.EnableDebugging: "{{.Values.processengine.debugstatus}}"
+        ProcessEngine.Groups: "{{.Values.processengine.groups}}"
+        ProcessEngine.SleepTime: "{{.Values.processengine.sleeptime}}"
+        ProcessEngine.Threads: "{{.Values.processengine.threads}}"
+        RedisServer: "{{ .Release.Name }}-iviva-redis-cluster-ip:6379"
+        SystemPath: /iviva/ivivaweb
+        TempFileLocation: /tmp/iviva/uploads
+        UrlPattern: SubDomain
+        Iviva.DisableDataProtectionApi: 1
+        OIDC.Keycloak.ClientID: {{.Values.keycloak.ClientID}}
+        OIDC.Keycloak.ClientSecret: {{.Values.keycloak.ClientSecret}}
+        OIDC.Keycloak.Authority: {{.Values.keycloak.Authority}}
+        OIDC.Keycloak.ResponseType: {{.Values.keycloak.ResponseType}}
+        OIDC.Keycloak.Nonce: {{.Values.keycloak.Nonce}}
+        OIDC.Keycloak.NonceCookie: {{.Values.keycloak.NonceCookie}}
+        Web.UseForwardedHeaders: 1
+        LucyEngine.ThreadPool.CanConfigure: {{.Values.iviva.canconfigurethreadpool}}
+        LucyEngine.ThreadPool.MinWorkerThreads: {{.Values.iviva.minworkerthreads}}
+        Common.LoginDetailsCacheEnabled: {{.Values.iviva.logindetailscacheenabled}}
+        Common.LoginDetailsCacheTimeSeconds: {{.Values.iviva.logindetailscachetimeseconds}}
+        LucyEngine.RabbitMQ.Host: "amqp://{{ .Release.Name }}-iviva-rabbitmq-cluster-ip"
+        LucyEngine.RabbitMQ.Username: guest
+        LucyEngine.RabbitMQ.Password: guest
+        Iviva.ThreadPool.CanConfigure: {{.Values.iviva.canconfigurethreadpool}}
+        Iviva.ThreadPool.MinWorkerThreads: {{.Values.iviva.minworkerthreads}}
+        Web.LogRequestHeaders: 0
+        LucyEngine.DefaultTimeoutInSeconds: 180
+        LucyEngine.InternalTimeoutInSeconds: 180
+        LucyEngine.ExecuteLucyActionTimeoutInSeconds: 180
+        LucyEngine.WebService.LogErrors: OCB Proxy,SLP
+
+

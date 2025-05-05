@@ -1,0 +1,97 @@
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-ivivanginx
+spec:
+  replicas: {{ .Values.iviva.sdmpodscount}}
+  strategy:
+        type: {{ .Values.deployment.type }}
+        rollingUpdate:
+           maxSurge: {{ .Values.deployment.maxSurge}}
+           maxUnavailable: {{ .Values.deployment.maxUnavailable}}
+  selector:
+    matchLabels:
+      app: {{ .Release.Name }}-ivivanginx
+  template:
+    metadata:
+      labels:
+        app: {{ .Release.Name }}-ivivanginx
+    spec:
+      containers:      
+      - name: {{ .Release.Name }}-ivivanginx
+        image: iviva.azurecr.io/ivivanginx
+        resources:
+          requests:
+            memory: {{ .Values.memrequests.sdm}}
+            cpu: {{ .Values.cpurequests.sdm}}
+          limits:
+            memory: {{ .Values.memlimits.sdm}}
+            cpu: {{ .Values.cpulimits.sdm}}       
+        volumeMounts:
+          - name:  {{ .Release.Name }}-ivivanginxconfig
+            mountPath:  /etc/nginx/sites-enabled
+        # command: ["tail"]
+        # args:
+        #   - "-f"
+        #   - "/dev/null"
+      restartPolicy: Always
+      dnsPolicy: "ClusterFirstWithHostNet"
+
+      volumes:
+        - name: {{ .Release.Name }}-ivivanginxconfig
+          configMap: 
+            name: {{ .Release.Name }}-ivivanginxconfig
+            defaultMode : 0777
+
+      imagePullSecrets:
+      - name: azure-reg-pull
+---
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}-ivivanginxconfig
+  labels:
+    app: {{ .Release.Name }}-ivivanginxconfig
+  annotations:
+    "helm.sh/hook": pre-install,pre-upgrade
+    "helm.sh/hook-weight": "-4"
+data:
+  reverseproxy.conf: |
+    upstream httplucy {
+        ip_hash;
+        server {{.Release.Name}}-lucyengineprimary:9111;
+    }
+    server {
+        listen 80;
+        location / {
+            proxy_pass http://httplucy;
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Proto $scheme;
+            proxy_set_header Upgrade $http_upgrade;
+            proxy_set_header Connection "upgrade";
+            client_max_body_size 50M;
+            proxy_read_timeout 600s;
+        }
+    }
+---
+
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name:  {{ .Release.Name }}-ivivanginx-cluster-ip
+spec:
+  selector:
+    app:  {{ .Release.Name }}-ivivanginx
+  type:  ClusterIP
+  ports:
+  - name:  {{ .Release.Name }}-ivivanginxport
+    port:  80
+    targetPort:  80
+
+
+

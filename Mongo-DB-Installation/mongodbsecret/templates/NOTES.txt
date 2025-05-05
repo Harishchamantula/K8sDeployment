@@ -1,0 +1,4 @@
+1. Get the password for mongodb instance that you are going to create, give this secret name in the existing secret of mongo-db.
+
+The root password for mongo instance can be found by executing the below command
+kubectl get secret --namespace {{.Release.Namespace}} {{.Release.Namespace}}-mongodb-secret -o jsonpath="{.data.mongodb-root-password}" | base64 -d

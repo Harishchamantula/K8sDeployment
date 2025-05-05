@@ -1,0 +1,57 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-ivivawfengine
+spec:
+  replicas: {{ .Values.iviva.wfenginepodscount}}
+  strategy:
+        type: {{ .Values.deployment.type }}
+        rollingUpdate:
+           maxSurge: {{ .Values.deployment.maxSurge}}
+           maxUnavailable: {{ .Values.deployment.maxUnavailable}}
+  selector:
+    matchLabels:
+      app: {{ .Release.Name }}-ivivawfengine
+  template:
+    metadata:
+      labels:
+        app: {{ .Release.Name }}-ivivawfengine
+    spec:
+      containers:      
+      - name: {{ .Release.Name }}-ivivawfengine
+        image: iviva.azurecr.io/v4/cp-1/wfengine/{{.Values.iviva.FWid}}/productapps/{{.Values.iviva.appsid}}/uxp:{{.Values.iviva.uxpid}}
+        resources:
+          requests:
+            memory: {{ .Values.memrequests.wfengine}}
+            cpu: {{ .Values.cpurequests.wfengine}}
+          limits:
+            memory: {{ .Values.memlimits.wfengine}}
+            cpu: {{ .Values.cpulimits.wfengine}} 
+        env:
+          - name:  IVIVA_CONFIG_PATH
+            value: /iviva/config/ivivaconfig.yaml
+          - name: LUCYENGINE_HTTPSERVER_HOST
+            value: {{.Release.Name}}-lucyengineprimary
+          - name: LUCYENGINE_HTTPSERVER_PORT
+            value: "9111"
+        volumeMounts:
+          - name:  {{ .Release.Name }}-ivivaconfig
+            mountPath:  /iviva/config
+          - name: {{ .Release.Name }}-ivivawfenginelogs
+            mountPath:  /var/log/iviva
+      restartPolicy: Always
+
+      volumes:
+        - name: {{ .Release.Name }}-ivivaconfig
+          configMap: 
+            name: {{ .Release.Name }}-ivivaconfig
+            defaultMode : 0777
+        - name: {{ .Release.Name }}-ivivawfenginelogs
+          emptyDir: {}
+      imagePullSecrets:
+      - name: azure-reg-pull
+      
+
+
+
+

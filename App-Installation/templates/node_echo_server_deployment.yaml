@@ -1,0 +1,34 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-iviva-node-echo-server
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ .Release.Name }}-iviva-node-echo-server
+  template:
+    metadata:
+      labels:
+        app: {{ .Release.Name }}-iviva-node-echo-server
+    spec:
+      containers:
+      - name: {{ .Release.Name }}-iviva-node-echo-server
+        image: iviva.azurecr.io/node-echo-server:v1
+        ports:
+        - containerPort: 3000
+      imagePullSecrets:
+      - name: azure-reg-pull
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: {{ .Release.Name }}-iviva-node-echo-server-cluster-ip
+spec:
+  selector:
+    app: {{ .Release.Name }}-iviva-node-echo-server
+  type: ClusterIP
+  ports:
+  - name: {{ .Release.Name }}-iviva-node-echo-server-port
+    port: 3000
+    targetPort: 3000

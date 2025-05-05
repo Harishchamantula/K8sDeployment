@@ -1,0 +1,66 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-ivivahydra
+spec:
+  replicas: {{ .Values.iviva.hydrapodscount}}
+  strategy:
+    type: {{ .Values.deployment.type }}
+    rollingUpdate:
+      maxSurge: {{ .Values.deployment.maxSurge}}
+      maxUnavailable: {{ .Values.deployment.maxUnavailable}}  
+  selector:
+    matchLabels:
+      app: {{ .Release.Name }}-ivivahydra
+  template:
+    metadata:
+      labels:
+        app: {{ .Release.Name }}-ivivahydra
+    spec:
+      containers:      
+      - name: {{ .Release.Name }}-ivivahydra
+        image: iviva.azurecr.io/v4/cp-1/hydra:latest
+        resources:
+          requests:
+            memory: {{ .Values.memrequests.hydra}}
+            cpu: {{ .Values.cpurequests.hydra}}
+          limits:
+            memory: {{ .Values.memlimits.hydra}}
+            cpu: {{ .Values.cpulimits.hydra}}
+        ports:
+        - containerPort: 7000       
+        volumeMounts:
+          - name:  {{ .Release.Name }}-ivivahydralogs
+            mountPath:  /var/log/iviva
+      restartPolicy: Always
+
+      volumes:
+        - name: {{ .Release.Name }}-ivivaconfig
+          configMap: 
+            name: {{ .Release.Name }}-ivivaconfig
+            defaultMode : 0777
+        - name: {{ .Release.Name }}-ivivahydralogs
+          emptyDir: {}
+      imagePullSecrets:
+      - name: azure-reg-pull
+      
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Release.Name }}-ivivahydra-cluster-ip
+spec:
+  # type: LoadBalancer
+  selector:
+    app: {{ .Release.Name }}-ivivahydra
+  ports:
+  {{- range untilStep (.Values.hydra.min_port|int) (.Values.hydra.max_port|int) 1 }}
+  - port: {{ . }}
+    targetPort: {{ . }}
+    protocol: TCP
+    name: "tcp-{{ . }}"
+  {{- end }}
+---
+
+
+
