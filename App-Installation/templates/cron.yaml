@@ -1,0 +1,80 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-ivivacron
+spec:
+  replicas: 1
+  strategy:
+        type: {{ .Values.deployment.type }}
+        rollingUpdate:
+           maxSurge: {{ .Values.deployment.maxSurge}}
+           maxUnavailable: {{ .Values.deployment.maxUnavailable}}  
+  selector:
+    matchLabels:
+      app: {{ .Release.Name }}-ivivacron
+  template:
+    metadata:
+      labels:
+        app: {{ .Release.Name }}-ivivacron
+    spec:
+      hostAliases:
+      - ip: "0.0.0.0"
+        hostnames:
+        - "{{ .Release.Name }}-ivivacron-cluster-ip"  
+      containers:      
+      - name: {{ .Release.Name }}-ivivacron
+        image: iviva.azurecr.io/v4/cp-1/cron:{{.Values.iviva.FWid}}
+        resources:
+          requests:
+            memory: {{ .Values.memrequests.ivivacron}}
+            cpu: {{ .Values.cpurequests.ivivacron}}
+          limits:
+            memory: {{ .Values.memlimits.ivivacron}}
+            cpu: {{ .Values.cpulimits.ivivacron}}
+        env:
+          - name:  IVIVA_CONFIG_PATH
+            value: /iviva/config/ivivaconfig.yaml
+          - name: LucyServer
+            value: {{.Release.Name}}-lucyengineprimary:9111
+          - name:  HERMES_CONFIG_PATH
+            value: /iviva/config/hermesconfig.yaml
+        ports:
+        - containerPort: 80             
+        volumeMounts:
+          - name:  {{ .Release.Name }}-ivivaconfig
+            mountPath:  /iviva/config
+          - name:  {{ .Release.Name }}-ivivacronlogs
+            mountPath:  /var/log/iviva
+          - name:  {{ .Release.Name }}-ivivacrontmp
+            mountPath:  /tmp/iviva
+
+      volumes:
+        - name: {{ .Release.Name }}-ivivaconfig
+          configMap: 
+            name: {{ .Release.Name }}-ivivaconfig
+            defaultMode : 0777
+        - name: {{ .Release.Name }}-hermes-config
+          configMap: 
+            name:  {{ .Release.Name }}-ivivahermesconfig
+            defaultMode : 0777
+        - name: {{ .Release.Name }}-ivivacronlogs
+          emptyDir: {}
+        - name: {{ .Release.Name }}-ivivacrontmp
+          emptyDir: {}
+      imagePullSecrets:
+      - name: azure-reg-pull
+
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name:  {{ .Release.Name }}-ivivacron-cluster-ip
+spec:
+  selector:
+    app:  {{ .Release.Name }}-ivivacron
+  type:  ClusterIP
+  ports:
+  - name:  {{ .Release.Name }}-ivivacronport
+    port:  80
+    targetPort:  80
+---

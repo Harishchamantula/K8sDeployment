@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-iviva-redis
+spec:
+  selector:
+    matchLabels:
+      app: {{ .Release.Name }}-iviva-redis
+  template:
+    metadata:
+      labels:
+        app: {{ .Release.Name }}-iviva-redis
+    spec:
+      containers:
+      - name: {{ .Release.Name }}-iviva-redis
+        image: redis:latest
+        resources:
+          requests:
+            memory: {{ .Values.memrequests.redis}}
+            cpu: {{ .Values.cpurequests.redis}}
+          limits:
+            memory: {{ .Values.memlimits.redis}}
+            cpu: {{ .Values.cpulimits.redis}} 
+        ports:
+        - containerPort: 6379
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name:  {{ .Release.Name }}-iviva-redis-cluster-ip
+spec:
+  selector:
+    app:  {{ .Release.Name }}-iviva-redis
+  type:  ClusterIP
+  ports:
+  - name:  {{ .Release.Name }}-iviva-redisport
+    port:  6379
+    targetPort:  6379
+
+

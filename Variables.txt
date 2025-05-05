@@ -1,0 +1,11 @@
+AccountURL
+Influxdb
+SQLserver
+SQLPWD
+SQLUSERNAME
+UXPID
+APPSID
+Mongodbreleasename
+MongodbInstallation
+Namespace
+Action

@@ -1,0 +1,43 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-iviva-rabbitmq
+spec:
+  replicas: 1  # Adjust the number of replicas as needed
+  selector:
+    matchLabels:
+      app: {{ .Release.Name }}-iviva-rabbitmq
+  template:
+    metadata:
+      labels:
+        app: {{ .Release.Name }}-iviva-rabbitmq
+    spec:
+      containers:
+      - name: {{ .Release.Name }}-iviva-rabbitmq
+        image: rabbitmq:3.11-management
+        resources:
+          requests:
+            memory: {{ .Values.memrequests.rabbitmq }}
+            cpu: {{ .Values.cpurequests.rabbitmq }}
+          limits:
+            memory: {{ .Values.memlimits.rabbitmq }}
+            cpu: {{ .Values.cpulimits.rabbitmq }}
+        ports:
+        - containerPort: 5672  # RabbitMQ default port
+        - containerPort: 15672 # RabbitMQ management UI port
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: {{ .Release.Name }}-iviva-rabbitmq-cluster-ip
+spec:
+  selector:
+    app: {{ .Release.Name }}-iviva-rabbitmq
+  type: ClusterIP
+  ports:
+  - name: {{ .Release.Name }}-iviva-rabbitmq-port
+    port: 5672
+    targetPort: 5672
+  - name: {{ .Release.Name }}-iviva-rabbitmq-management-port
+    port: 15672
+    targetPort: 15672

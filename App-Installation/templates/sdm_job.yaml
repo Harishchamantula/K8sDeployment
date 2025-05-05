@@ -1,0 +1,53 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ .Release.Name }}-ivivasdmjob
+spec:
+  template:
+    metadata:
+      labels:
+        app: {{ .Release.Name }}-ivivasdmjob
+      annotations:
+        "helm.sh/hook": pre-install
+        "helm.sh/hook-weight": "-3"
+        "helm.sh/hook-delete-policy": hook-succeeded,hook-failed
+    spec:
+      restartPolicy: Never
+      containers:      
+      - name: {{ .Release.Name }}-ivivasdmjob
+        image: iviva.azurecr.io/v4/cp-1/sdm/{{.Values.iviva.FWid}}/productapps/{{.Values.iviva.appsid}}/uxp:{{.Values.iviva.uxpid}}
+        env:
+          - name:  IVIVA_CONFIG_PATH
+            value: /iviva/config/ivivaconfig.yaml  
+          - name: LUCYENGINE_HTTPSERVER_HOST
+            value: {{.Release.Name}}-lucyengineprimary  
+          - name: LUCYENGINE_HTTPSERVER_PORT
+            value: "9111"    
+        volumeMounts:
+          - name:  {{ .Release.Name }}-ivivaconfig
+            mountPath:  /iviva/config
+          - name:  {{ .Release.Name }}-ivivasdmjoblogs
+            mountPath:  /var/log/iviva
+        command: ["/bin/bash", "-c"]
+        args:
+          - cd /iviva/ivivaweb/DB;
+            /iviva/sdm/sdm mergedb DB AccountDB.xml auto;
+            /iviva/sdm/sdm mergedb MessagingDB MessagingDB.xml auto;
+            /iviva/sdm/sdm mergedb JobQueueDB JobQueueDB.xml auto;
+            /iviva/sdm/sdm mergedb GroupDB ProcessDB.xml auto;
+            /iviva/sdm/sdm mergedb LucyEventDB LucyEventDB.xml auto; 
+
+      volumes:
+        - name: {{ .Release.Name }}-ivivaconfig
+          configMap: 
+            name: {{ .Release.Name }}-ivivaconfig
+            defaultMode : 0777
+        - name: {{ .Release.Name }}-ivivasdmjoblogs
+          emptyDir: {}
+      imagePullSecrets:
+      - name: azure-reg-pull
+      
+
+
+
+

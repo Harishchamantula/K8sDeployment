@@ -1,0 +1,80 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-ivivalucyengineprimary
+spec:
+  replicas: {{ .Values.iviva.webpodscount}}
+  strategy:
+        type: {{ .Values.deployment.type }}
+        rollingUpdate:
+           maxSurge: {{ .Values.deployment.maxSurge}}
+           maxUnavailable: {{ .Values.deployment.maxUnavailable}} 
+  selector:
+    matchLabels:
+      app: {{ .Release.Name }}-ivivalucyengineprimary
+  template:
+    metadata:
+      labels:
+        app: {{ .Release.Name }}-ivivalucyengineprimary
+    spec:
+      containers:      
+      - name: {{ .Release.Name }}-ivivalucyengineprimary
+        image: iviva.azurecr.io/v4/cp-1/lucyengine/{{.Values.iviva.FWid}}/productapps/{{.Values.iviva.appsid}}/uxp:{{.Values.iviva.uxpid}}
+        resources:
+          requests:
+            memory: {{ .Values.memrequests.lucyengineprimary}}
+            cpu: {{ .Values.cpurequests.lucyengineprimary}}
+          limits:
+            memory: {{ .Values.memlimits.lucyengineprimary}}
+            cpu: {{ .Values.cpulimits.lucyengineprimary}}        
+        env:
+          - name:  IVIVA_CONFIG_PATH
+            value: /iviva/config/ivivaconfig.yaml        
+          - name: podname
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.name
+          - name: LUCYENGINE_HTTPSERVER_HOST
+            value: {{ .Release.Name }}-lucyengineprimary
+          - name: LucyListener
+            value: "0.0.0.0"          
+        volumeMounts:
+          - name:  {{ .Release.Name }}-ivivaconfig
+            mountPath:  /iviva/config
+          - name:  {{ .Release.Name }}-ivivalucyenginelogs
+            mountPath:  /var/log/iviva
+        ports:
+        - containerPort: 9090
+        - containerPort: 9111
+      volumes:
+        - name: {{ .Release.Name }}-ivivaconfig
+          configMap: 
+            name: {{ .Release.Name }}-ivivaconfig
+            defaultMode : 0777
+        - name: {{ .Release.Name }}-ivivalucyenginelogs
+          emptyDir: {}
+      imagePullSecrets:
+      - name: azure-reg-pull
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Release.Name }}-lucyengineprimary
+spec:  
+  selector:
+    app: {{ .Release.Name }}-ivivalucyengineprimary
+  ports:
+  - name: lucyport
+    port: 9090
+    targetPort: 9090
+  - name: http
+    port: 9111
+    targetPort: 9111
+---
+
+
+
+
+
+
+

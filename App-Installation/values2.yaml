@@ -1,0 +1,165 @@
+# Default values for ivivav4chart.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+############ Below are settings related to iviva services###############
+iviva:
+  FWid: "8b331692" ###### FW id from Eutech
+  appsid: "4d54331d" ####### apps id from Eutech
+  uxpid: "latest"  ###### uxp id from Eutech
+  sqluid: "sa"  ###### sql server username
+  sqlpwd: "Welcome@123" ###### sql server password
+  sqlserver: "192.16.29.5" ###### sql server IP
+  influxdb: "10.0.0.194" ###### influxdb IP
+  webpodscount: "1"  ###### Number of Web Pods
+  emailgatewaypodscount: "1" ###### Number of Email GW Pods
+  sdmpodscount: "1" ###### Number of sdm pods
+  smsgatewaypodscount: "1"   ###### Number of SMS GW Pods
+  sdtaskrunnerpodscount: "1"  ###### Number of sdtaskrunner Pods
+  wfenginepodscount: "1"  ###### Number of WF Engine Pods
+  hydrapodscount: "1" ###### Number of Hydra Pods
+  hermespodscount: "1"  ###### Number of Hermes Pods
+  jobrunnerpodscount: "1" ###### Number of Jobrunner Pods
+  accounturl: "https://{account}.raseel.city" ######### Enter the account url here ex: https://{account}.raseel.city
+  basedomain: "raseel.city" ######### Enter the base domain here ex: raseel.city   
+  canconfigurethreadpool: "1"
+  minworkerthreads: "5000"
+  logindetailscacheenabled: "1"
+  logindetailscachetimeseconds: "43200" # 12 hrs
+  lucyengineclustered: "0"
+emailgateway:
+  fromemailaddress: "contact@postal.raseel.city" ####### Enter the sender email address i.e account from which you want to send email to others
+  host: "postal.raseel.city" ##### Enter the SMTP host name ex:smtp.gmail.com
+  port: "2525" ##### Enter the SMTP host port number ex: 587
+  user: "contact@postal.raseel.city" ##### Enter the account name through which the SMTP host will be accessed
+  password: "NNeTIwPPUYo7Y3M2Od9HeiM5" ##### Enter the password for the above mentioned account name
+processengine:
+  clustered: "" ## Enable or disable clustering ex: 1 or 0
+  debugstatus: "" ## Enable or disable clustering ex: 1 or 0
+  groups: "" ## Enter the groupname here ex: A
+  sleeptime: "" ## Enter the sleeptime in ms ex: 1000
+  threads: "" ### Enter the number of threads for processengine to use ex: 1
+############### Hydra port Range ###########
+hydra:
+  min_port: "7000" ###### Starting port
+  max_port: "7100" ##### Ending Port
+############## Database names that will be created in the sql server ##############
+dbnames:
+  aspdbname: "asp19"
+  jobqueuedbname: "jobqueue19"
+  messagingdbname: "messaging19"
+  lucyeventdbname: "LucyEventDB19"  
+  groupdbname: "process19"
+################## Domain name through which the site will be accessed#########
+ivivaingress:
+  domainname: "*.raseel.city"
+  lucydomain: "devportal.raseel.city"
+############ Deployment rollout settings###############
+deployment:
+  type: RollingUpdate
+  maxSurge: 25%
+  maxUnavailable: 25%
+############CPU and MEM for all iviva services ###########
+cpurequests:
+  ivivaweb: 50m
+  lucyengineprimary: 50m
+  emailgateway: 50m
+  hermes: 50m
+  hydra: 50m
+  ingress: 50m
+  jobrunner: 50m
+  mongodb: 50m
+  redis: 50m
+  sdm: 50m
+  sdtaskrunner: 50m
+  smsgateway: 50m
+  wfengine: 50m
+  rabbitmq: 50m
+cpulimits:
+  ivivaweb: 1000m
+  lucyengineprimary: 1000m
+  emailgateway: 500m
+  hermes: 500m
+  hydra: 2000m  
+  ingress: 2000m
+  jobrunner: 500m
+  mongodb: 500m
+  redis: 500m
+  sdm: 2000m
+  sdtaskrunner: 500m
+  smsgateway: 500m
+  wfengine: 500m
+  rabbitmq: 500m
+memrequests:
+  ivivaweb: 512Mi
+  lucyengineprimary: 512Mi
+  emailgateway: 128Mi
+  hermes: 128Mi
+  hydra: 128Mi  
+  ingress: 128Mi
+  jobrunner: 128Mi
+  mongodb: 128Mi
+  redis: 128Mi
+  sdm: 128Mi
+  sdtaskrunner: 128Mi
+  smsgateway: 128Mi
+  wfengine: 128Mi
+  rabbitmq: 128Mi
+memlimits:
+  ivivaweb: 4096Mi
+  lucyengineprimary: 4096Mi
+  emailgateway: 512Mi
+  hermes: 512Mi
+  hydra: 512Mi  
+  ingress: 512Mi
+  jobrunner: 512Mi
+  mongodb: 512Mi
+  redis: 512Mi
+  sdm: 512Mi
+  sdtaskrunner: 512Mi
+  smsgateway: 512Mi
+  wfengine: 512Mi
+  rabbitmq: 512Mi
+########### Autoscaling################
+autoscaling:
+  enabled: true
+  minReplicas: 1
+  maxReplicas: 5
+  targetCPUUtilizationPercentage: 85
+  targetMemoryUtilizationPercentage: 90
+############### Cert manager###############
+
+cert-manager: #defined by either the name or alias of your dependency in Chart.yaml
+  #namespace: security
+  enabled: True
+ingress: 
+  #namespace: ingress-nginx
+  enabled: True
+
+####################### Cert values taken after converting to base64 - for ingress cert mapping############# 
+certsecrets:
+  tlscrtbase64: "LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSUd0akNDQlo2Z0F3SUJBZ0lJS1lJSkhBWXkvdEV3RFFZSktvWklodmNOQVFFTEJRQXdnY1l4Q3pBSkJnTlYKQkFZVEFsVlRNUkF3RGdZRFZRUUlFd2RCY21sNmIyNWhNUk13RVFZRFZRUUhFd3BUWTI5MGRITmtZV3hsTVNVdwpJd1lEVlFRS0V4eFRkR0Z5Wm1sbGJHUWdWR1ZqYUc1dmJHOW5hV1Z6TENCSmJtTXVNVE13TVFZRFZRUUxFeXBvCmRIUndPaTh2WTJWeWRITXVjM1JoY21acFpXeGtkR1ZqYUM1amIyMHZjbVZ3YjNOcGRHOXllUzh4TkRBeUJnTlYKQkFNVEsxTjBZWEptYVdWc1pDQlRaV04xY21VZ1EyVnlkR2xtYVdOaGRHVWdRWFYwYUc5eWFYUjVJQzBnUnpJdwpIaGNOTWpRd01qQTFNVE15TXpNeFdoY05NalV3TXpBNE1UTXlNek14V2pBWU1SWXdGQVlEVlFRRERBMHFMbkpoCmMyVmxiQzVqYVhSNU1JSUJJakFOQmdrcWhraUc5dzBCQVFFRkFBT0NBUThBTUlJQkNnS0NBUUVBd2pkNDkyNU4KamVJRGIxQjd2TjRJKy9EdEdpSW9QT0dVdmFyK3FBV2dLY2ZoWVhCc1NHVi9xRDBidXhWODZjRkF1Mmp1V2NDMQpLazBuNjRVZ0M2RFU3UlVKYjBobXdpRUZJN01HN2w3NHRDSHFlUUhjNVIwVVcxYldUUExXcWt6b1pWS3lSNmNKCmFhcnFKWVBwTmVwa3VQWFBOenZjRzFwYVFpVzl1Zm9OcVdkR2M0aEZZSVE3SkozbGRPMGgrUVpmV3ZNTEd5MlMKK3JBdWk1R3JyVUR0ZmxVL0dNdUlXcGxRd2VuTE9MYXFGWHVoZHBvc2Z6am1yM1plbWdocjNGcEhrZ25LNGkwawpqVUdLdlFwcjV2ZUtkUHlDbExWc3ZsV3BqU1pndGxvUFhUd1B6cWQ0Nlh0K1U5VnhhVDZUSzVUbXVTbk54ZllzClFiTFZJQk95ci9odW5RSURBUUFCbzRJRFV6Q0NBMDh3REFZRFZSMFRBUUgvQkFJd0FEQWRCZ05WSFNVRUZqQVUKQmdnckJnRUZCUWNEQVFZSUt3WUJCUVVIQXdJd0RnWURWUjBQQVFIL0JBUURBZ1dnTUQwR0ExVWRId1EyTURRdwpNcUF3b0M2R0xHaDBkSEE2THk5amNtd3VjM1JoY21acFpXeGtkR1ZqYUM1amIyMHZjMlpwWnpKek1TMDJOekl1ClkzSnNNR01HQTFVZElBUmNNRm93VGdZTFlJWklBWWI5YmdFSEZ3RXdQekE5QmdnckJnRUZCUWNDQVJZeGFIUjAKY0RvdkwyTmxjblJwWm1sallYUmxjeTV6ZEdGeVptbGxiR1IwWldOb0xtTnZiUzl5WlhCdmMybDBiM0o1THpBSQpCZ1puZ1F3QkFnRXdnWUlHQ0NzR0FRVUZCd0VCQkhZd2REQXFCZ2dyQmdFRkJRY3dBWVllYUhSMGNEb3ZMMjlqCmMzQXVjM1JoY21acFpXeGtkR1ZqYUM1amIyMHZNRVlHQ0NzR0FRVUZCekFDaGpwb2RIUndPaTh2WTJWeWRHbG0KYVdOaGRHVnpMbk4wWVhKbWFXVnNaSFJsWTJndVkyOXRMM0psY0c5emFYUnZjbmt2YzJacFp6SXVZM0owTUI4RwpBMVVkSXdRWU1CYUFGQ1ZGZ1doUUpqZzlPeTBzdnMxcTJiWTlzMlpqTUNVR0ExVWRFUVFlTUJ5Q0RTb3VjbUZ6ClpXVnNMbU5wZEhtQ0MzSmhjMlZsYkM1amFYUjVNQjBHQTFVZERnUVdCQlJYN1lndlJXRlEwdCtaY25MOWFrSHYKVC9vS0lUQ0NBWDRHQ2lzR0FRUUIxbmtDQkFJRWdnRnVCSUlCYWdGb0FIWUFUbldqSjF5YUVNTTRXMnpVM3o5Uwo2eDN3NEk0YmpXbkFzZnBrc1dLYU9kOEFBQUdOZVhBdnlnQUFCQU1BUnpCRkFpRUFxcmRZMUFaU0dLUVAwYjNhCnpWU1FJUW5xVG5uaHJpbGZVSlNsazBLN3RLa0NJRFFEaHl4YytneWhpV3RPYlVKYk9VUm9helk3UVdUOEplR0MKK2FaekNmQWdBSFlBZlZrZUV1RjRLbnNjWVdkOFh2MzQwSWRjRktCT2xaNjVBeS9aRG93dWViZ0FBQUdOZVhBdwozd0FBQkFNQVJ6QkZBaUVBaTBVZ3dtMGFTeXBibmdOVFhkRUszVFUzSEdUZGt1ZmNjSm9rM3FPbVVLc0NJRTlPCmVmdC9FYjNlNEtvQlZ3NkJhS01xb2hBYzFlNVk1RzZNTHJUL1RUSXdBSFlBelBzUGFvVnhDV1grbFp0VHp1bXkKZkNMcGhWd05sNDIycVg1VXdQNU1EYkFBQUFHTmVYQXhSZ0FBQkFNQVJ6QkZBaUFtVUVabkFuRWllWjFIbHJySwp3NEpibnBEM1pVQ2RwTUdkbDVnbEFVamYzZ0loQUlXVTVpRFlQblZjWHZBQ2NPaGJNQXViWFNYc05uYVI4T2RIClRxV09ucUN5TUEwR0NTcUdTSWIzRFFFQkN3VUFBNElCQVFCVFI2Um9xOU5QZDZZU0lUeU1qdnhaeE9xUm1yN2gKWWJSZ1FTc0J2a1BmbXdjNkRkWmp1cEE4QUh3ZnBZNjJGbEQ2TlNUUlpIWDVSdDlVRk5PTUJRQ2Jrdi96MGxndwpRWCs5ZjdqRlpQV09vTDFUZ05lUjZTcmhYWEdMRk5UVFc2RTE2UnRxaGRGWnVqTFViTTVVTndUU0JUMHRFN1g5CkdOQXZTUU10UW5NUUs2WWNtdk5JRGpiZS8zN1NVTVhKRDY1ZXFOVTY1ZGQ1RVl0RkRNSURjZzk0Snh3QkxUU2gKYjZQMGZZV3ptTzRvaUtvMjc2R2RlNU1iU3Q3dk5HT1FISG9Kbm5sVks2eDNKV1RvQ0JGQ0t0RzNVLzI3WVB1bApieWtRTWkzVTFlUjJkdlJWUDFXbGtGYjhjNzdRT3JBU2xkRXdnNXpML2lJY1VCMm9wQ0J0UFU0UgotLS0tLUVORCBDRVJUSUZJQ0FURS0tLS0tCi0tLS0tQkVHSU4gQ0VSVElGSUNBVEUtLS0tLQpNSUlGQURDQ0EraWdBd0lCQWdJQkJ6QU5CZ2txaGtpRzl3MEJBUXNGQURDQmp6RUxNQWtHQTFVRUJoTUNWVk14CkVEQU9CZ05WQkFnVEIwRnlhWHB2Ym1FeEV6QVJCZ05WQkFjVENsTmpiM1IwYzJSaGJHVXhKVEFqQmdOVkJBb1QKSEZOMFlYSm1hV1ZzWkNCVVpXTm9ibTlzYjJkcFpYTXNJRWx1WXk0eE1qQXdCZ05WQkFNVEtWTjBZWEptYVdWcwpaQ0JTYjI5MElFTmxjblJwWm1sallYUmxJRUYxZEdodmNtbDBlU0F0SUVjeU1CNFhEVEV4TURVd016QTNNREF3Ck1Gb1hEVE14TURVd016QTNNREF3TUZvd2djWXhDekFKQmdOVkJBWVRBbFZUTVJBd0RnWURWUVFJRXdkQmNtbDYKYjI1aE1STXdFUVlEVlFRSEV3cFRZMjkwZEhOa1lXeGxNU1V3SXdZRFZRUUtFeHhUZEdGeVptbGxiR1FnVkdWagphRzV2Ykc5bmFXVnpMQ0JKYm1NdU1UTXdNUVlEVlFRTEV5cG9kSFJ3T2k4dlkyVnlkSE11YzNSaGNtWnBaV3hrCmRHVmphQzVqYjIwdmNtVndiM05wZEc5eWVTOHhOREF5QmdOVkJBTVRLMU4wWVhKbWFXVnNaQ0JUWldOMWNtVWcKUTJWeWRHbG1hV05oZEdVZ1FYVjBhRzl5YVhSNUlDMGdSekl3Z2dFaU1BMEdDU3FHU0liM0RRRUJBUVVBQTRJQgpEd0F3Z2dFS0FvSUJBUURsa0daTDdQbEdjYWtnZzc3cGJMOUt5VWhwZ1hWT2JTVDJ5eGNUK0xCeFdZUjZheXVGCnBEUzFGdVhMek9sQmNDeWtMdGI2TW4zaHFONlVFS3d4d2NEWWF2OVpKNnQyMXZ3TGRHdTRwNjQveEZUMHRERkUKM1pOV2pLUk1YcHVKeXlTRG0rSlhmYmZZRWgvSmhXMzAwWUR4VUp1SHJ0UUxFQVg3Sjdvb2JSZnBEdFpOdVRsVgpCdjhLSkFWK0w4WWRjbXpVaXltTVYzM2EyZXRtR3ROUHA5OS9Vc1F3eGFYSkRnTEZVNzkzT0dnR0pNTm15RGQrCk1CNUZjU00xLzVEWUtwMk41N0NTVFR4L0tncVQzTTBXUm1YM1lJU0xka3VSSjNNVWt1RHE3bzhXNm8wT1BuWVgKdjMySmdJQkVRK2N0NEVNSmRkbzI2SzNiaVRyMVhSS09Jd1NEQWdNQkFBR2pnZ0VzTUlJQktEQVBCZ05WSFJNQgpBZjhFQlRBREFRSC9NQTRHQTFVZER3RUIvd1FFQXdJQkJqQWRCZ05WSFE0RUZnUVVKVVdCYUZBbU9EMDdMU3krCnpXclp0ajJ6Wm1Nd0h3WURWUjBqQkJnd0ZvQVVmQXd5SDZmWk1IL0VmV2lqWXFpaHpxc0hXeWN3T2dZSUt3WUIKQlFVSEFRRUVMakFzTUNvR0NDc0dBUVVGQnpBQmhoNW9kSFJ3T2k4dmIyTnpjQzV6ZEdGeVptbGxiR1IwWldObwpMbU52YlM4d093WURWUjBmQkRRd01qQXdvQzZnTElZcWFIUjBjRG92TDJOeWJDNXpkR0Z5Wm1sbGJHUjBaV05vCkxtTnZiUzl6Wm5KdmIzUXRaekl1WTNKc01Fd0dBMVVkSUFSRk1FTXdRUVlFVlIwZ0FEQTVNRGNHQ0NzR0FRVUYKQndJQkZpdG9kSFJ3Y3pvdkwyTmxjblJ6TG5OMFlYSm1hV1ZzWkhSbFkyZ3VZMjl0TDNKbGNHOXphWFJ2Y25rdgpNQTBHQ1NxR1NJYjNEUUVCQ3dVQUE0SUJBUUJXWmNyKzh6OEtxSk9MR01mZVEya1ROQ0MrVGw5NHFHdWMyMnBOClFkdkJFK3pjTVFBaVh2Y0FuZ3pnTkdVMCtiRTZUa2pJRW9HSVhGcytDRk42OXhwazM3aFFZY3hUVVVBcFM4TDAKcmpwZjVNcXRKc3hPWVVQbC9WZW1OM0RPUXl1d2xNT1M2ZUZmcWhCSnQybms0TkFmWktRcnpSOXZvUGlFSkJqTwplVDJwa2I5VUdCT0ptVlFSRFZYRkpndDVUMW9jYnZsajJ4U0FwQWVyK3JLbHVZamRrZjVsTzZTamViNkpUZUhRCnNQVElGd3dLbGhSOENiZHM0Y0xZVmRRWW9LcEJhWEFrbzdudjZWcmNQdXVVU3ZDMzNsOE9kdnI3KzJrRFJVQlEKN25JTXBCS0dnYzBUMFU3RVBNcE9EZEltOFFDM3RLYWk0VzU2Z2Ywd3JIb2Z4MWw3Ci0tLS0tRU5EIENFUlRJRklDQVRFLS0tLS0KLS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSUVvRENDQTRpZ0F3SUJBZ0lET1JTRU1BMEdDU3FHU0liM0RRRUJDd1VBTUdneEN6QUpCZ05WQkFZVEFsVlQKTVNVd0l3WURWUVFLRXh4VGRHRnlabWxsYkdRZ1ZHVmphRzV2Ykc5bmFXVnpMQ0JKYm1NdU1USXdNQVlEVlFRTApFeWxUZEdGeVptbGxiR1FnUTJ4aGMzTWdNaUJEWlhKMGFXWnBZMkYwYVc5dUlFRjFkR2h2Y21sMGVUQWVGdzB4Ck5EQXhNREV3TnpBd01EQmFGdzB6TVRBMU16QXdOekF3TURCYU1JR1BNUXN3Q1FZRFZRUUdFd0pWVXpFUU1BNEcKQTFVRUNCTUhRWEpwZW05dVlURVRNQkVHQTFVRUJ4TUtVMk52ZEhSelpHRnNaVEVsTUNNR0ExVUVDaE1jVTNSaApjbVpwWld4a0lGUmxZMmh1YjJ4dloybGxjeXdnU1c1akxqRXlNREFHQTFVRUF4TXBVM1JoY21acFpXeGtJRkp2CmIzUWdRMlZ5ZEdsbWFXTmhkR1VnUVhWMGFHOXlhWFI1SUMwZ1J6SXdnZ0VpTUEwR0NTcUdTSWIzRFFFQkFRVUEKQTRJQkR3QXdnZ0VLQW9JQkFRQzk3Y0VEL1BhUC9BS3hiMXVmU05tZGVlS2l0d05oVmhqRFI3Ylh5ajAxTG9sRAo5NkZwbTk2S0d2MFRJSnkwU1hjeUtWYjl1ZXlNM1NMNmN0d25ZWmZ1OWxxRTdHNFp1WWtzM0lSYjFYVDdhMS9GCmlhVVFVb2xHVmZTNGRSem1mK1JVcmt2NFZYSlhBaG40RjNGWjZ4NG9CM1RGblVpK2JMVDBwTER6WkRkNWtzRHMKUmw1LzRXMVRUR0t2elI4TFk3czZuZnY4ZVFDWVlYVFBKb0pBWS9PeWNtb1pEWm5LMUE1MXpEZjdpNG5CV2ZGaQpmMSt6WDJVdytLZTNUWFphSG5aZU5NRG9sbGFaaXJQd2Y2VE52ZHd5TVh5UnorQmZFZmhycWtsYzBabVUwYUxqClkxc0pkclZXWXVGTGRCMlcxQ2JVQ0FSWjBKZ09EdWJlL01Qc0g1RHhBZ01CQUFHamdnRXBNSUlCSlRBUEJnTlYKSFJNQkFmOEVCVEFEQVFIL01BNEdBMVVkRHdFQi93UUVBd0lCQmpBZEJnTlZIUTRFRmdRVWZBd3lINmZaTUgvRQpmV2lqWXFpaHpxc0hXeWN3SHdZRFZSMGpCQmd3Rm9BVXYxKzMwYzdkSDRiMFcxV3MzTmNRd2c2cGlPY3dPZ1lJCkt3WUJCUVVIQVFFRUxqQXNNQ29HQ0NzR0FRVUZCekFCaGg1b2RIUndPaTh2YjJOemNDNXpkR0Z5Wm1sbGJHUjAKWldOb0xtTnZiUzh3T0FZRFZSMGZCREV3THpBdG9DdWdLWVluYUhSMGNEb3ZMMk55YkM1emRHRnlabWxsYkdSMApaV05vTG1OdmJTOXpabkp2YjNRdVkzSnNNRXdHQTFVZElBUkZNRU13UVFZRVZSMGdBREE1TURjR0NDc0dBUVVGCkJ3SUJGaXRvZEhSd2N6b3ZMMk5sY25SekxuTjBZWEptYVdWc1pIUmxZMmd1WTI5dEwzSmxjRzl6YVhSdmNua3YKTUEwR0NTcUdTSWIzRFFFQkN3VUFBNElCQVFDRlk4SFozYm4vcWIybUdkeS9Fem9ST0NKVXNhd0ZFUHQ4czVZLwpNWXRtLzRqejRiLzd4eDhBLzBacWkyRXl5UUZSZHZ1YXh2b2dVY2hHeEpqWGVhUGpCSEkvaTAwMFUyZnNNeXg3CjZKUUJLSHc2TkZzQ2R4YU5RQ1V6c0x4c2w5Y0ZlditNaGM1dm9GTUFGMjRlYkwwaTF3cUlOL1o5NjVsQjd5ZkwKakdCclRBRitaVkFMVDdpVm1wcHVOUDF6T2pQeGtkWHpUaTEwNk8vVGtEWHhCbWhrMU5BVC9WTFR4bTNCT29veAozUVVtTlVxTVpiaFNhNEhzMHB5MU5CQ1huRDdHTCsyT1FrSWtMdWx6bWlYNUVmSHlJMm5MNVpScG9OTGNzUHhFCmlhd1hxTXpWTjNjV3hZQzVESTlYQWxXWmhYdEo4QzVib01KWFUxMmk2S1kzd3dINgotLS0tLUVORCBDRVJUSUZJQ0FURS0tLS0tCi0tLS0tQkVHSU4gQ0VSVElGSUNBVEUtLS0tLQpNSUlFRHpDQ0F2ZWdBd0lCQWdJQkFEQU5CZ2txaGtpRzl3MEJBUVVGQURCb01Rc3dDUVlEVlFRR0V3SlZVekVsCk1DTUdBMVVFQ2hNY1UzUmhjbVpwWld4a0lGUmxZMmh1YjJ4dloybGxjeXdnU1c1akxqRXlNREFHQTFVRUN4TXAKVTNSaGNtWnBaV3hrSUVOc1lYTnpJRElnUTJWeWRHbG1hV05oZEdsdmJpQkJkWFJvYjNKcGRIa3dIaGNOTURRdwpOakk1TVRjek9URTJXaGNOTXpRd05qSTVNVGN6T1RFMldqQm9NUXN3Q1FZRFZRUUdFd0pWVXpFbE1DTUdBMVVFCkNoTWNVM1JoY21acFpXeGtJRlJsWTJodWIyeHZaMmxsY3l3Z1NXNWpMakV5TURBR0ExVUVDeE1wVTNSaGNtWnAKWld4a0lFTnNZWE56SURJZ1EyVnlkR2xtYVdOaGRHbHZiaUJCZFhSb2IzSnBkSGt3Z2dFZ01BMEdDU3FHU0liMwpEUUVCQVFVQUE0SUJEUUF3Z2dFSUFvSUJBUUMzTXNqKzZYR21CSVd0REJGazM4NU43OGdER0ljL29hdjdQS2FmCjhNT2gydFRZYml0VGtQc2twRDZFOEo3b1gremxKMFQxS0tZL2U5N2dLdkRJcjFNdm5zb0ZBWk1lajJZY09hZE4KK2xxMmN3UWxadXQzZitkWnhrcVpKUlJVNnliSDgzOFoxVEJ3ajYrd1Jpci9yZXNwN2RlZnFnU0hvOVQ1aWFVMApYOXREa1lJMjJXWThzYmk1Z3YyY09qNFF5RHZ2Qm1WbWVwc1pHRDMvY1ZFOE1DNWZ2ajEzYzdKZEJtekRJMWFhCks0VW1raHluQXJQa1B3MnZDSG1DdURZOTZwelROYk84YWNyMXpKM28vV1NORjRBemJsNUtYWm5KSG9lMG5SckEKMVc0VE5TTmUzNXRmUGUvVzkzYkM2ajY3ZUEwY1FtZHJCTmo0MXRwdmkvSkVvQUdyQWdFRG80SEZNSUhDTUIwRwpBMVVkRGdRV0JCUy9YN2ZSenQwZmh2UmJWYXpjMXhEQ0RxbUk1ekNCa2dZRFZSMGpCSUdLTUlHSGdCUy9YN2ZSCnp0MGZodlJiVmF6YzF4RENEcW1JNTZGc3BHb3dhREVMTUFrR0ExVUVCaE1DVlZNeEpUQWpCZ05WQkFvVEhGTjAKWVhKbWFXVnNaQ0JVWldOb2JtOXNiMmRwWlhNc0lFbHVZeTR4TWpBd0JnTlZCQXNUS1ZOMFlYSm1hV1ZzWkNCRApiR0Z6Y3lBeUlFTmxjblJwWm1sallYUnBiMjRnUVhWMGFHOXlhWFI1Z2dFQU1Bd0dBMVVkRXdRRk1BTUJBZjh3CkRRWUpLb1pJaHZjTkFRRUZCUUFEZ2dFQkFBV2RQNGlkMGNrYVZhR3NhZlB6V2RxYkFZY2FUMWVwb1hrSkt0djMKTDdJZXpNZGVhdGlEaDZHWDcwazFQbmNHUVZoaXY0NVl1QXBuUCt5ejNTRm1IOGxVK25MTVBVeEEySUd2ZDU2RAplcnVpeC9VMEY0N1pFVUQwL0N3cVRSVi9wMkpkTGlYVEFBc2dHaDFvK1JlNDlMMkw3U2haM1UwV2l4ZUR5TEpsCnh5MTZwYXE4VTRadDNWZWt5dmdnUVF0bzhQVDdkTDVXWFhwNTlma2RoZU10bGI3MWNaQkR6STBmbWdBS2h5bnAKVlNKWUFDUHE0eEpES1Z0SENOMk1RV3BsQnFqbElhcEJ0SlVobGJsOTBUU3JFOWF0dk56aVBUbk52VDUxY0tFWQpXUVBKSXJTUG5OVmVLdGVsdHRRS2JmaTNRQkZHbWg5NURtSy9ENWZzNEM4ZkY1UT0KLS0tLS1FTkQgQ0VSVElGSUNBVEUtLS0tLQo="
+  tlskeybase64: "LS0tLS1CRUdJTiBQUklWQVRFIEtFWS0tLS0tCk1JSUV2QUlCQURBTkJna3Foa2lHOXcwQkFRRUZBQVNDQktZd2dnU2lBZ0VBQW9JQkFRRENOM2ozYmsyTjRnTnYKVUh1ODNnajc4TzBhSWlnODRaUzlxdjZvQmFBcHgrRmhjR3hJWlgrb1BSdTdGWHpwd1VDN2FPNVp3TFVxVFNmcgpoU0FMb05UdEZRbHZTR2JDSVFVanN3YnVYdmkwSWVwNUFkemxIUlJiVnRaTTh0YXFUT2hsVXJKSHB3bHBxdW9sCmcrazE2bVM0OWM4M085d2JXbHBDSmIyNStnMnBaMFp6aUVWZ2hEc2tuZVYwN1NINUJsOWE4d3NiTFpMNnNDNkwKa2F1dFFPMStWVDhZeTRoYW1WREI2Y3M0dHFvVmU2RjJtaXgvT09hdmRsNmFDR3ZjV2tlU0NjcmlMU1NOUVlxOQpDbXZtOTRwMC9JS1V0V3krVmFtTkptQzJXZzlkUEEvT3AzanBlMzVUMVhGcFBwTXJsT2E1S2MzRjlpeEJzdFVnCkU3S3YrRzZkQWdNQkFBRUNnZ0VBZnNEZGZmN0xOdEpQRTVNZmJzQXFkT05rbXkyM3ZTUXNneXphVHFaOVJVZGkKWE1tV29oazhHM3ptWUU5QjJ2MTVWZGJCMkduZzB0N1FNdklMWEF0M2E5UFMrSUgwTHJhR09DcGJWNjg3K2JRNAo1d2pFTmZPb21ZUXZFTUZjUUlFNUd3ZkJ1dW5WUnRWNVEwcTRKYXY0V0k1MDBzT0tmMytVY0o5WkY4dU9wd1BRCnJ2WmNFcHpqcnlnZ1JHZ0k2NGhkQmdBZFAyWGszdGFiQ3RpL056OHB2aHN3aXhLd3lDMHhPdmw1THhJQ0pxTGMKVXZWK2RqQWJMQnpjajJqYmlxRzZ3dDhlVWZtNWZxV1FYUDVoaXhNN1BoQUJnYTVHYjJVTmZkbndqbm5IMzhzdApHSW85ckxiTnhyeUhnRU15WHc5cnYrRjVkVGtKUkwrWDdQN3B2OHF3TVFLQmdRRFZmcXZ0bHc4MWFXWUdZZGlLCmZVaDRyeDhsWVZzSURxYS9VUEk1ZUVrVVB2UDhZY1VjcUNudnE3V2NmRUxucWxxWWNsYVNJb1M2VnhIcnQwZWoKVUNZTzR6Wk5YQTFxbjQ4T3dEUXR4QXZTSmF3NkovcjZzZ3IrUEh5TXhKWVpOajVMaXcwRlhvaXdTelV0NXYxbwpaa1l0U0NNRmI4eVdVTFk2eVV6SUEzS1Z5d0tCZ1FEbzRqMk1lWnZFMmVsZlpRRWVyaUUwWG9RSStFUHk5dnNoCmFaSjdWQk83M1UvN3ZaYm5wVlBjM0RQckUyOHQ3dVRJUHVKckdzMlhIdEIzVUMyc1FLbXc2UlpIUGswTXNLRXUKVlA2cDZOd0dXWEh5Um5qWXhMWWljNWk0UGdiMVFjK09MdXdmMmdXNkowM3hCeFloS0N3MWI0TEoxQ1lBN0N0aApIZUJmbGNiQU53S0JnRkFKV2ZrTExZZHZpUEVSazNWdnZGQ0tEbG9jSWwxbDZMdEdaRmlKTUpSbmVWNS9aTDcyCmlDb3lyRFlMRzZYdjVtREtWSXdhWnJuWTFINFN5c2Q5ejVhN05XdFEvREtodUtibUJXbTIybHVoQmUwVGVmS3IKOXBVVEpmbzc1SzEwK1d1bXFHMy8zNngvdFdNTStxazkxa2M1aU8rTDF4M3ZDaklGcjBRNGpxZDdBb0dBRExiZApXV0FDU3hzQ2pMeTg5T25ZMGowZXhFYVpueGd3MmNBanlTdnI3K1BEVENFcnJmWHV3QzRkZjRZT0dkbmpEN092Ck5OMi92N0prK3o2Ylg3NGdCWktVTHN1TjlWVm5WMW80bFJvcmVRVkZIVThQcGZZSFk1WWdEbDhFamp0TGs1Mm8KTW96NnB4RWlSamgyMHRTWXBVb3pQOFdmVlltUFRMd08xZWtkY3IwQ2dZQUpRaUlnWUJ1ZCtXMXIyWURWMVAwYgpsZXd4MytKVnRtYklSTi9PcDJBVHRGUVIxNE93T082bjVsMGs4RXp0L3RFOS9iQWdGd1gwdVJUazlLM1pvcm1aCjdUbjh0QmxkQThjTCtoTDZLcURqNzE0L00rMUl4RWQ5WkliV3o0NGJsR0ZhYnhYR1YrM2d4aFNaT09vbjRSNmsKTEZ6dkdTVkk1bGlRSjlrOW5Sa3J3Zz09Ci0tLS0tRU5EIFBSSVZBVEUgS0VZLS0tLS0="
+
+
+
+#### Keycloak settings#####
+# ClientID, ClientSecret and Authority have to come from the Keycloak realm that was configured
+# ResponseType will usually be 'code'
+# An example of the Authority entry: https://auth.mdadev.iviva.cloud/realms/lucy
+# (Basically the realm url)
+# Others can be usually kept blank
+keycloak:
+  ClientID: "iviva"
+  ClientSecret: "rhGtxYWzXdTPBzXpADDdfnobYWx4gMvU"
+  Authority: "https://deviam.raseel.city/realms/raseel"
+  ResponseType: "code"
+  Nonce:
+  NonceCookie:
+########## Mongodb Settings #########
+mongodb:
+  username: "ivivaroot" ###USername you have chosen while installing mongodb 
+  password: "hlbB8CzT"  ### Password that you got from the mongodb secret
+  replicaseturl: "mongo-mongodb-0.mongo-mongodb-headless.iviva.svc.cluster.local:27017,mongo-mongodb-1.mongo-mongodb-headless.iviva.svc.cluster.local:27017" #### Comma separated hosts that you get from the output of mongodb installation, this will vary with number of replicas that you want
+  replicasetname: "rs0" #### replica set name that you gave while installing mongodb, better to leave this rs0 even there and also here
+  

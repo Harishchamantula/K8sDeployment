@@ -1,0 +1,31 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ .Release.Name }}-ivivasqlcmd  
+spec:
+  template:
+    metadata:
+      labels:
+        app: {{ .Release.Name }}-ivivasqlcmd
+      annotations:
+        "helm.sh/hook": pre-install
+        "helm.sh/hook-weight": "-5"
+    spec:
+      restartPolicy: Never
+      containers:      
+      - name: {{ .Release.Name }}-ivivasqlcmd
+        image: fabiang/sqlcmd:latest
+        env:
+          - name: db_user
+            value: {{.Values.iviva.sqluid}}
+          - name: db_pwd
+            value: {{.Values.iviva.sqlpwd}}
+          - name: db_ip
+            value: {{.Values.iviva.sqlserver}}
+        command: ["/bin/bash", "-c"]
+        args:
+          - sqlcmd -C -S $(db_ip) -U $(db_user) -P $(db_pwd) -Q "CREATE DATABASE {{.Values.dbnames.aspdbname}}";        
+            sqlcmd -C -S $(db_ip) -U $(db_user) -P $(db_pwd) -Q "CREATE DATABASE {{.Values.dbnames.jobqueuedbname}}";
+            sqlcmd -C -S $(db_ip) -U $(db_user) -P $(db_pwd) -Q "CREATE DATABASE {{.Values.dbnames.lucyeventdbname}}";
+            sqlcmd -C -S $(db_ip) -U $(db_user) -P $(db_pwd) -Q "CREATE DATABASE {{.Values.dbnames.messagingdbname}}";
+            sqlcmd -C -S $(db_ip) -U $(db_user) -P $(db_pwd) -Q "CREATE DATABASE {{.Values.dbnames.groupdbname}}";
