@@ -21,7 +21,7 @@ iviva:
   hermespodscount: "1"  ###### Number of Hermes Pods
   jobrunnerpodscount: "1" ###### Number of Jobrunner Pods
   accounturl: "https://{account}.raseel.city" ######### Enter the account url here ex: https://{account}.raseel.city
-  basedomain: "raseel.city" ######### Enter the base domain here ex: raseel.city   
+  basedomain: "raseeel.city" ######### Enter the base domain here ex: raseel.city   
   canconfigurethreadpool: "1"
   minworkerthreads: "5000"
   logindetailscacheenabled: "1"
