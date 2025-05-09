@@ -4,7 +4,7 @@
 
 ############ Below are settings related to iviva services###############
 iviva:
-  FWid: "8b331692" ###### FW id from Eutech
+  FWid: "" ###### FW id from Eutech
   appsid: "4d54331d" ####### apps id from Eutech
   uxpid: "latest"  ###### uxp id from Eutech
   sqluid: "sa"  ###### sql server username
